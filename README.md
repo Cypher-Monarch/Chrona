@@ -18,4 +18,4 @@ Before you can run Chrona, make sure to have the following dependencies installe
 - `PyPDF2`: To read and extract text from PDF files.
 - `python-docx`: To read and extract text from Word documents.
 - `pydub`: For audio file format conversion.
-- `tkinter`: For building the graphical user interface.
+- `PySide5`: For building the graphical user interface.
