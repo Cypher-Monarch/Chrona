@@ -2,12 +2,21 @@ import os
 import pyttsx3
 import PyPDF2
 import docx
-import sys
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QFileDialog,
-    QTextEdit, QSlider, QComboBox, QHBoxLayout, QRadioButton, QButtonGroup,
-    QMessageBox
+    QApplication,
+    QWidget,
+    QPushButton,
+    QVBoxLayout,
+    QLabel,
+    QFileDialog,
+    QSlider,
+    QComboBox,
+    QHBoxLayout,
+    QRadioButton,
+    QButtonGroup,
+    QMessageBox,
 )
+import requests
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 from pydub import AudioSegment
@@ -16,12 +25,17 @@ from pathlib import Path
 # Initialize TTS engine
 engine = pyttsx3.init()
 
+VERSION = "1.0.0"
+
+
 def get_documents_folder():
-    return str(Path.home() / "Documents" / "Text2Speech MP3s")
+    return str(Path.home() / "Documents" / "Chrona")
+
 
 def read_word_file(file_path):
     doc = docx.Document(file_path)
     return "\n".join([para.text for para in doc.paragraphs])
+
 
 def read_pdf_file(file_path):
     text = ""
@@ -31,16 +45,19 @@ def read_pdf_file(file_path):
             text += page.extract_text() + "\n"
     return text
 
+
 def read_txt_file(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         return file.read()
 
+
 def speak(text, rate, volume, voice_id):
-    engine.setProperty('rate', rate)
-    engine.setProperty('volume', volume)
-    engine.setProperty('voice', voice_id)
+    engine.setProperty("rate", rate)
+    engine.setProperty("volume", volume)
+    engine.setProperty("voice", voice_id)
     engine.say(text)
     engine.runAndWait()
+
 
 def save_as_mp3(text, file_name, rate, volume, voice_id):
     output_folder = get_documents_folder()
@@ -49,9 +66,9 @@ def save_as_mp3(text, file_name, rate, volume, voice_id):
     output_path = os.path.join(output_folder, f"{file_name}.mp3")
     temp_wav = os.path.join(output_folder, "temp.wav")
 
-    engine.setProperty('rate', rate)
-    engine.setProperty('volume', volume)
-    engine.setProperty('voice', voice_id)
+    engine.setProperty("rate", rate)
+    engine.setProperty("volume", volume)
+    engine.setProperty("voice", voice_id)
 
     engine.save_to_file(text, temp_wav)
     engine.runAndWait()
@@ -61,6 +78,28 @@ def save_as_mp3(text, file_name, rate, volume, voice_id):
     os.remove(temp_wav)
 
     return output_path
+
+
+def check_for_updates(self):
+    try:
+        response = requests.get(
+            "https://raw.githubusercontent.com/Cypher-Monarch/Chrona/master/version/version.txt",
+            timeout=5,
+        )
+        latest_version = response.text.strip()
+        if latest_version != VERSION:
+            QMessageBox.information(
+                self,
+                "Update Available",
+                f"A new version {latest_version} is available! Please update for the latest features and fixes.",
+            )
+    except requests.RequestException as e:
+        QMessageBox.warning(
+            self,
+            "Update Check Failed",
+            f"Could not check for updates: {e}\nYou can manually check on GitHub.",
+        )
+
 
 class TTSApp(QWidget):
     def __init__(self):
@@ -84,7 +123,7 @@ class TTSApp(QWidget):
         self.status_label.setFixedHeight(100)
 
         # Voices list
-        self.voices = engine.getProperty('voices')
+        self.voices = engine.getProperty("voices")
         self.voice_id = self.voices[0].id
 
         # UI Elements
@@ -107,7 +146,6 @@ class TTSApp(QWidget):
         self.mp3_radio = QRadioButton("🎵 MP3 Only")
         self.both_radio = QRadioButton("🔊 Speak + MP3")
         self.both_radio.setChecked(True)  # default
-
 
         self.mode_group = QButtonGroup()
         self.mode_group.addButton(self.speak_radio)
@@ -206,6 +244,8 @@ class TTSApp(QWidget):
                 border-radius: 6px;
             }
         """)
+        check_for_updates(self)
+
     def toggle_advanced_options(self, event=None):
         is_visible = self.advanced_options_container.isVisible()
         self.advanced_options_container.setVisible(not is_visible)
@@ -214,10 +254,8 @@ class TTSApp(QWidget):
         else:
             self.advanced_hint.setText("▼ Advanced Options")
 
-
     def log(self, message):
         self.status_label.setText(message)
-
 
     def update_speed_label(self, value):
         self.slider_label.setText(f"🔊 Speed: {value}")
@@ -237,7 +275,7 @@ class TTSApp(QWidget):
             self,
             "Confirm Conversion",
             "Are you sure you want to convert this file?",
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.Yes | QMessageBox.No,
         )
 
         if reply != QMessageBox.Yes:
@@ -277,6 +315,7 @@ class TTSApp(QWidget):
 
         except Exception as e:
             self.log(f"❌ Error: {str(e)}")
+
 
 if __name__ == "__main__":
     app = QApplication([])
