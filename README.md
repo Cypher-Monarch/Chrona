@@ -44,6 +44,15 @@ _(Installed automatically if you use the AUR package)_
 yay -S chrona-bin
 ```
 
+### Generic Linux
+
+```
+curl -L -o install.sh https://github.com/Cypher-Monarch/Chrona/releases/download/v1.0.0/install.sh
+chmod +x install.sh
+sudo ./install.sh
+```
+
+
 ### 🪟 Windows
 
 Grab the latest installer or ZIP build from [Releases](https://github.com/Cypher-Monarch/Chrona/releases).
