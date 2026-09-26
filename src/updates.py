@@ -3,7 +3,7 @@
 import requests
 from PySide6.QtWidgets import QMessageBox
 
-from .config import UPDATE_URL, VERSION
+from constants import UPDATE_URL, VERSION
 
 
 def check_for_updates(parent=None) -> None:

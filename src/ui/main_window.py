@@ -18,18 +18,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from .document_reader import read_document
-from .tts_service import TTSService
-from .updater import check_for_updates
+from audio.engine import TTSEngine
+from audio.exporters import save_as_mp3
+from documents.reader import read_document
+from updates import check_for_updates
 
 
 class TTSApp(QWidget):
     """Main Chrona application window."""
 
-    def __init__(self, tts_service: TTSService | None = None):
+    def __init__(self, tts_engine: TTSEngine | None = None):
         super().__init__()
 
-        self.tts = tts_service or TTSService()
+        self.tts = tts_engine or TTSEngine()
         self.voices = self.tts.voices
 
         if not self.voices:
@@ -232,18 +233,29 @@ class TTSApp(QWidget):
 
             elif self.mp3_radio.isChecked():
                 file_name = Path(file_path).stem
-                mp3_path = self.tts.save_as_mp3(
-                    text, file_name, rate, volume, self.voice_id
+                output_path = save_as_mp3(
+                    self.tts,
+                    text,
+                    file_name,
+                    rate,
+                    volume,
+                    self.voice_id,
                 )
-                self.log(f"✅ MP3 saved at:\n{mp3_path}")
+
+                self.log(f"Saved MP3: {output_path}")
 
             else:
                 self.tts.speak(text, rate, volume, self.voice_id)
                 file_name = Path(file_path).stem
-                mp3_path = self.tts.save_as_mp3(
-                    text, file_name, rate, volume, self.voice_id
+                output_path = save_as_mp3(
+                    self.tts,
+                    text,
+                    file_name,
+                    rate,
+                    volume,
+                    self.voice_id,
                 )
-                self.log(f"✅ Spoken and MP3 saved at:\n{mp3_path}")
+                self.log(f"✅ Spoken and MP3 saved at:\n{output_path}")
 
         except Exception as exc:
             self.log(f"❌ Error: {exc}")

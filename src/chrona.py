@@ -3,7 +3,7 @@
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
-from chrona.ui import TTSApp
+from ui.main_window import TTSApp
 
 
 def main() -> None:

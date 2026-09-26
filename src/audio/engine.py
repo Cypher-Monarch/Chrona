@@ -1,16 +1,12 @@
 """Text-to-speech and audio export services."""
 
-import os
 from pathlib import Path
 from typing import Any, cast
 
 import pyttsx3
-from pydub import AudioSegment
-
-from .config import DOCUMENTS_FOLDER
 
 
-class TTSService:
+class TTSEngine:
     """Owns the TTS engine and exposes Chrona's audio operations."""
 
     def __init__(self):
@@ -25,28 +21,17 @@ class TTSService:
         self.engine.say(text)
         self.engine.runAndWait()
 
-    def save_as_mp3(
+    def save_to_wav(
         self,
         text: str,
-        file_name: str,
+        output_path: Path,
         rate: int,
         volume: float,
         voice_id: str,
-    ) -> Path:
-        DOCUMENTS_FOLDER.mkdir(parents=True, exist_ok=True)
-
-        output_path = DOCUMENTS_FOLDER / f"{file_name}.mp3"
-        temp_wav = DOCUMENTS_FOLDER / "temp.wav"
-
+    ) -> None:
         self._configure(rate, volume, voice_id)
-        self.engine.save_to_file(text, str(temp_wav))
+        self.engine.save_to_file(text, str(output_path))
         self.engine.runAndWait()
-
-        audio = AudioSegment.from_wav(temp_wav)
-        audio.export(output_path, format="mp3")
-        os.remove(temp_wav)
-
-        return output_path
 
     def _configure(self, rate: int, volume: float, voice_id: str) -> None:
         self.engine.setProperty("rate", rate)
