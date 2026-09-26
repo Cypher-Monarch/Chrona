@@ -2,8 +2,9 @@
 
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtWidgets import (
     QButtonGroup,
     QComboBox,
@@ -20,6 +21,7 @@ from PySide6.QtWidgets import (
 
 from audio.engine import TTSEngine
 from audio.exporters import save_as_mp3
+from audio.piper import Piper, PiperVoice
 from documents.reader import read_document
 from updates import check_for_updates
 
@@ -30,13 +32,22 @@ class TTSApp(QWidget):
     def __init__(self, tts_engine: TTSEngine | None = None):
         super().__init__()
 
-        self.tts = tts_engine or TTSEngine()
-        self.voices = self.tts.voices
+        self.piper = Piper()
+        self.voices: list[PiperVoice] = self.piper.find_voices()
 
         if not self.voices:
-            raise RuntimeError("No TTS voices available")
+            raise RuntimeError("No Piper voices available")
 
-        self.voice_id: str = str(self.voices[0].id)
+        self.voice = self.voices[0]
+
+        self.tts = tts_engine or TTSEngine(
+            self.piper.executable,
+            self.voice,
+        )
+
+        self.audio_output = QAudioOutput(self)
+        self.player = QMediaPlayer(self)
+        self.player.setAudioOutput(self.audio_output)
 
         self._build_window()
         self._build_widgets()
@@ -194,8 +205,11 @@ class TTSApp(QWidget):
         self.slider_label.setText(f"🔊 Speed: {value}")
 
     def change_voice(self, index: int) -> None:
-        if self.voices:
-            self.voice_id = self.voices[index].id
+        if not self.voices:
+            return
+
+        self.voice = self.voices[index]
+        self.tts.voice = self.voice
 
     def browse_file(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(
@@ -224,11 +238,8 @@ class TTSApp(QWidget):
             text = read_document(file_path)
             self.log("✅ File loaded. Processing...")
 
-            rate = self.speed_slider.value()
-            volume = 1.0
-
             if self.speak_radio.isChecked():
-                self.tts.speak(text, rate, volume, self.voice_id)
+                self.speak(text)
                 self.log("✅ Spoken aloud successfully!")
 
             elif self.mp3_radio.isChecked():
@@ -237,25 +248,33 @@ class TTSApp(QWidget):
                     self.tts,
                     text,
                     file_name,
-                    rate,
-                    volume,
-                    self.voice_id,
                 )
 
                 self.log(f"Saved MP3: {output_path}")
 
             else:
-                self.tts.speak(text, rate, volume, self.voice_id)
+                self.speak(text)
+
                 file_name = Path(file_path).stem
                 output_path = save_as_mp3(
                     self.tts,
                     text,
                     file_name,
-                    rate,
-                    volume,
-                    self.voice_id,
                 )
+
                 self.log(f"✅ Spoken and MP3 saved at:\n{output_path}")
 
         except Exception as exc:
             self.log(f"❌ Error: {exc}")
+
+    def speak(self, text: str) -> None:
+        """Render text with Piper and play the resulting audio."""
+        output_path = Path("/tmp/chrona-speech.wav")
+
+        self.tts.save_to_wav(
+            text,
+            output_path,
+        )
+
+        self.player.setSource(QUrl.fromLocalFile(str(output_path)))
+        self.player.play()
