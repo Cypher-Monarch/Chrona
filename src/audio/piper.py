@@ -1,5 +1,6 @@
 """Piper installation and voice discovery."""
 
+import json
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,8 @@ class PiperVoice:
     speaker: str
     quality: str
     model_path: Path
+    sample_rate: int
+    channels: int = 1
 
 
 class Piper:
@@ -57,23 +60,35 @@ class Piper:
     def _parse_voice(
         self,
         model_path: Path,
-        search_root: Path,
+        search_path: Path,
     ) -> PiperVoice | None:
         """Parse voice metadata from a Piper model path."""
         try:
-            parts = model_path.relative_to(search_root).parts
-        except ValueError:
+            relative_path = model_path.relative_to(search_path)
+            parts = relative_path.parts
+
+            if len(parts) < 4:
+                return None
+
+            _, language, speaker, quality = parts[:4]
+
+            config_path = model_path.with_suffix(".onnx.json")
+
+            with config_path.open("r", encoding="utf-8") as config_file:
+                config = json.load(config_file)
+
+            sample_rate = config["audio"]["sample_rate"]
+            num_speakers = config.get("num_speakers", 1)
+
+            return PiperVoice(
+                name=f"{speaker.title()} ({language})",
+                language=language,
+                speaker=speaker,
+                quality=quality,
+                model_path=model_path,
+                sample_rate=sample_rate,
+                channels=1,
+            )
+
+        except (OSError, KeyError, TypeError, ValueError):
             return None
-
-        if len(parts) < 4:
-            return None
-
-        _, language, speaker, quality = parts[:4]
-
-        return PiperVoice(
-            name=f"{speaker.title()} ({language})",
-            language=language,
-            speaker=speaker,
-            quality=quality,
-            model_path=model_path,
-        )
