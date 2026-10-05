@@ -1,4 +1,4 @@
-"""Document loading utilities."""
+# Document loading utilities.
 
 from pathlib import Path
 
@@ -7,13 +7,13 @@ import PyPDF2
 
 
 def read_word_file(file_path: str | Path) -> str:
-    """Read paragraph text from a DOCX file."""
+    # Read paragraph text from a DOCX file.
     doc = docx.Document(str(file_path))
     return "\n".join(paragraph.text for paragraph in doc.paragraphs)
 
 
 def read_pdf_file(file_path: str | Path) -> str:
-    """Extract text from all pages of a PDF file."""
+    # Extract text from all pages of a PDF file.
     text = ""
     with open(file_path, "rb") as pdf_file:
         reader = PyPDF2.PdfReader(pdf_file)
@@ -23,7 +23,7 @@ def read_pdf_file(file_path: str | Path) -> str:
 
 
 def read_txt_file(file_path: str | Path) -> str:
-    """Read a UTF-8 text file."""
+    # Read a UTF-8 text file.
     with open(file_path, "r", encoding="utf-8") as file:
         return file.read()
 
@@ -36,7 +36,7 @@ READERS = {
 
 
 def read_document(file_path: str | Path) -> str:
-    """Read a supported document based on its file extension."""
+    # Read a supported document based on its file extension.
     path = Path(file_path)
     reader = READERS.get(path.suffix.lower())
 

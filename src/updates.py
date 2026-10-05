@@ -1,4 +1,4 @@
-"""Chrona update checking."""
+# Chrona update checking.
 
 import requests
 from PySide6.QtWidgets import QMessageBox
@@ -7,7 +7,7 @@ from constants import UPDATE_URL, VERSION
 
 
 def check_for_updates(parent=None) -> None:
-    """Check GitHub for a newer Chrona version."""
+    # Check GitHub for a newer Chrona version.
     try:
         response = requests.get(UPDATE_URL, timeout=5)
         response.raise_for_status()

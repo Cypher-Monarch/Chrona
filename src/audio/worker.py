@@ -8,9 +8,10 @@ from documents.normalizer import split_paragraphs, split_synthesis_chunks
 
 
 class AudioWorker(QObject):
-    """Generate audio and place it into a bounded PCM queue."""
+    # Generate audio and place it into a bounded PCM queue.
 
     finished = Signal()
+    cancelled = Signal()
     error = Signal(str)
 
     def __init__(
@@ -23,6 +24,11 @@ class AudioWorker(QObject):
         self.engine = engine
         self.text = text
         self.audio_queue = audio_queue
+        self.cancel_requested = False
+
+    def cancel(self) -> None:
+        self.cancel_requested = True
+        self.engine.cancel()
 
     @Slot()
     def run(self) -> None:
@@ -48,6 +54,14 @@ class AudioWorker(QObject):
                         )
                     )
 
+            if self.cancel_requested:
+                self.cancelled.emit()
+                return
+
             self.finished.emit()
+
         except Exception as exc:
-            self.error.emit(str(exc))
+            if self.cancel_requested:
+                self.cancelled.emit()
+            else:
+                self.error.emit(str(exc))

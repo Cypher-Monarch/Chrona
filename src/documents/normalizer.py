@@ -1,4 +1,4 @@
-"""Text normalization utilities."""
+# Text normalization utilities.
 
 import re
 
@@ -6,7 +6,7 @@ from constants import MAX_SYNTHESIS_CHARS
 
 
 def normalize_text(text: str) -> str:
-    """Normalize extracted document text for further processing."""
+    # Normalize extracted document text for further processing.
     text = text.replace("\r\n", "\n").replace("\r", "\n")
 
     text = re.sub(r"[ \t]+\n", "\n", text)
@@ -18,7 +18,7 @@ def normalize_text(text: str) -> str:
 
 
 def split_paragraphs(text: str) -> list[str]:
-    """Split normalized text into non-empty paragraphs."""
+    # Split normalized text into non-empty paragraphs.
     return [paragraph.strip() for paragraph in text.split("\n\n") if paragraph.strip()]
 
 
@@ -26,7 +26,7 @@ def split_synthesis_chunks(
     paragraph: str,
     max_chars: int = MAX_SYNTHESIS_CHARS,
 ) -> list[str]:
-    """Split a paragraph into bounded whitespace-separated chunks."""
+    # Split a paragraph into bounded whitespace-separated chunks.
     words = paragraph.split()
     chunks: list[str] = []
     current: list[str] = []

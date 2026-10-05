@@ -1,4 +1,4 @@
-"""Application configuration and filesystem paths."""
+# Application configuration and filesystem paths.
 
 from pathlib import Path
 

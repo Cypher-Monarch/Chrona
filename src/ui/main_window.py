@@ -1,4 +1,4 @@
-"""Chrona Qt user interface."""
+# Chrona Qt user interface.
 
 from pathlib import Path
 
@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QRadioButton,
-    QSlider,
     QWidget,
 )
 
@@ -27,7 +26,7 @@ from updates import check_for_updates
 
 
 class TTSApp(QWidget):
-    """Main Chrona application window."""
+    # Main Chrona application window.
 
     def __init__(self, tts_engine: TTSEngine | None = None):
         super().__init__()
@@ -78,7 +77,8 @@ class TTSApp(QWidget):
         self.status_label.setText(message)
 
     def update_speed_label(self, value: int) -> None:
-        self.slider_label.setText(f"🔊 Speed: {value}")
+        self.speed_value.setText(str(value))
+        self.tts.set_speed(value)
 
     def change_voice(self, index: int) -> None:
         if not self.voices:
@@ -98,6 +98,9 @@ class TTSApp(QWidget):
         if file_path:
             self.process_file(file_path)
 
+    def cancel_audio(self) -> None:
+        self.audio_controller.cancel()
+
     def process_file(self, file_path: str) -> None:
         reply = QMessageBox.question(
             self,
@@ -114,6 +117,8 @@ class TTSApp(QWidget):
             text = normalize_text(read_document(file_path))
             self.audio_controller.set_output_file_name(Path(file_path).stem)
 
+            self.cancel_button.setVisible(True)
+
             self.log("✅ File loaded. Processing...")
             self.audio_controller.render_audio(text)
 
@@ -123,8 +128,9 @@ class TTSApp(QWidget):
     status_label: QLabel
     label: QLabel
     voice_dropdown: QComboBox
-    slider_label: QLabel
-    speed_slider: QSlider
+    speed_value: QLabel
+    voice_label: QLabel
+    cancel_button: QPushButton
 
     speak_radio: QRadioButton
     mp3_radio: QRadioButton

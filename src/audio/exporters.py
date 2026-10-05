@@ -1,4 +1,4 @@
-"""Audio export functions."""
+# Audio export functions.
 
 import subprocess
 from pathlib import Path
@@ -8,7 +8,7 @@ from constants import DOCUMENTS_FOLDER
 
 
 class MP3Exporter:
-    """Stream PCM audio chunks into FFmpeg and produce an MP3 file."""
+    # Stream PCM audio chunks into FFmpeg and produce an MP3 file.
 
     def __init__(self, file_name: str):
         DOCUMENTS_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -19,7 +19,7 @@ class MP3Exporter:
         self.finished = False
 
     def start(self, chunk: AudioChunk) -> None:
-        """Start FFmpeg using the format of the first audio chunk."""
+        # Start FFmpeg using the format of the first audio chunk.
         if self.started:
             return
 
@@ -47,7 +47,7 @@ class MP3Exporter:
         self.started = True
 
     def write(self, chunk: AudioChunk) -> None:
-        """Write a PCM chunk to FFmpeg."""
+        # Write a PCM chunk to FFmpeg.
         if not self.started:
             self.start(chunk)
 
@@ -57,7 +57,7 @@ class MP3Exporter:
         self.process.stdin.write(chunk.data)
 
     def finish(self) -> Path:
-        """Finish FFmpeg and return the generated MP3 path."""
+        # Finish FFmpeg and return the generated MP3 path.
         if self.finished:
             return self.output_path
 
@@ -83,7 +83,7 @@ class MP3Exporter:
         return self.output_path
 
     def abort(self) -> None:
-        """Terminate FFmpeg if export is still running."""
+        # Terminate FFmpeg if export is still running.
         if self.process is not None and self.process.poll() is None:
             self.process.kill()
             self.process.wait()

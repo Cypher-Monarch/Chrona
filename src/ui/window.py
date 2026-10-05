@@ -1,7 +1,9 @@
 from PySide6.QtGui import QIcon
 
+from constants import ICON_PATH
+
 
 def build_window(window) -> None:
-    window.setWindowTitle("Text-to-Speech & MP3 Converter")
-    window.setWindowIcon(QIcon("Chrona.png"))
-    window.setFixedSize(480, 420)
+    window.setWindowTitle("Chrona")
+    window.setWindowIcon(QIcon(str(ICON_PATH)))
+    window.setFixedSize(460, 390)

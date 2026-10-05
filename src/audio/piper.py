@@ -1,4 +1,4 @@
-"""Piper installation and voice discovery."""
+# Piper installation and voice discovery.
 
 import json
 import shutil
@@ -8,7 +8,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class PiperVoice:
-    """Represents an installed Piper voice."""
+    # Represents an installed Piper voice.
 
     name: str
     language: str
@@ -20,13 +20,13 @@ class PiperVoice:
 
 
 class Piper:
-    """Discovers the Piper executable and installed voice models."""
+    # Discovers the Piper executable and installed voice models.
 
     def __init__(self):
         self.executable = self._find_executable()
 
     def _find_executable(self) -> str:
-        """Find the Piper executable on PATH."""
+        # Find the Piper executable on PATH.
         executable = shutil.which("piper-tts") or shutil.which("piper")
 
         if executable is None:
@@ -37,7 +37,7 @@ class Piper:
         return executable
 
     def find_voices(self) -> list[PiperVoice]:
-        """Find installed Piper voices."""
+        # Find installed Piper voices.
         voices: list[PiperVoice] = []
 
         search_paths = [
@@ -62,7 +62,7 @@ class Piper:
         model_path: Path,
         search_path: Path,
     ) -> PiperVoice | None:
-        """Parse voice metadata from a Piper model path."""
+        # Parse voice metadata from a Piper model path.
         try:
             relative_path = model_path.relative_to(search_path)
             parts = relative_path.parts
